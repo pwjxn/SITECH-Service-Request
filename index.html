@@ -1,0 +1,1132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SITECH Support Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  html, body { margin: 0; padding: 0; background: #12181F; }
+  * { box-sizing: border-box; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+
+const { useState, useEffect, useMemo, useCallback } = React;
+
+function svgProps(size, color, strokeWidth, className) {
+  return { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: color, strokeWidth: strokeWidth || 2, strokeLinecap: "round", strokeLinejoin: "round", className };
+}
+function LayoutGrid({ size = 16, color = "currentColor", className, strokeWidth }) {
+  return (<svg {...svgProps(size, color, strokeWidth, className)}><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>);
+}
+function List({ size = 16, color = "currentColor", className, strokeWidth }) {
+  return (<svg {...svgProps(size, color, strokeWidth, className)}><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>);
+}
+function Plus({ size = 16, color = "currentColor", className, strokeWidth }) {
+  return (<svg {...svgProps(size, color, strokeWidth, className)}><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>);
+}
+function X({ size = 16, color = "currentColor", className, strokeWidth }) {
+  return (<svg {...svgProps(size, color, strokeWidth, className)}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>);
+}
+function Search({ size = 16, color = "currentColor", className, strokeWidth }) {
+  return (<svg {...svgProps(size, color, strokeWidth, className)}><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>);
+}
+function ChevronDown({ size = 16, color = "currentColor", className, strokeWidth }) {
+  return (<svg {...svgProps(size, color, strokeWidth, className)}><polyline points="6 9 12 15 18 9"/></svg>);
+}
+function ChevronLeft({ size = 16, color = "currentColor", className, strokeWidth }) {
+  return (<svg {...svgProps(size, color, strokeWidth, className)}><polyline points="15 18 9 12 15 6"/></svg>);
+}
+function ChevronRight({ size = 16, color = "currentColor", className, strokeWidth }) {
+  return (<svg {...svgProps(size, color, strokeWidth, className)}><polyline points="9 18 15 12 9 6"/></svg>);
+}
+function Clock({ size = 16, color = "currentColor", className, strokeWidth }) {
+  return (<svg {...svgProps(size, color, strokeWidth, className)}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>);
+}
+function CheckCircle2({ size = 16, color = "currentColor", className, strokeWidth }) {
+  return (<svg {...svgProps(size, color, strokeWidth, className)}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>);
+}
+function Wrench({ size = 16, color = "currentColor", className, strokeWidth }) {
+  return (<svg {...svgProps(size, color, strokeWidth, className)}><path d="M14.7 6.3a4 4 0 0 0-5.66 5.66L2.5 18.5l3 3 6.54-6.54a4 4 0 0 0 5.66-5.66l-2.5 2.5a2 2 0 0 1-2.83-2.83Z"/></svg>);
+}
+function MapPin({ size = 16, color = "currentColor", className, strokeWidth }) {
+  return (<svg {...svgProps(size, color, strokeWidth, className)}><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>);
+}
+function User({ size = 16, color = "currentColor", className, strokeWidth }) {
+  return (<svg {...svgProps(size, color, strokeWidth, className)}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>);
+}
+function CalendarIcon({ size = 16, color = "currentColor", className, strokeWidth }) {
+  return (<svg {...svgProps(size, color, strokeWidth, className)}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>);
+}
+function CalendarDays({ size = 16, color = "currentColor", className, strokeWidth }) {
+  return (<svg {...svgProps(size, color, strokeWidth, className)}><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="14" x2="8.01" y2="14"/><line x1="12" y1="14" x2="12.01" y2="14"/><line x1="16" y1="14" x2="16.01" y2="14"/></svg>);
+}
+function Loader2({ size = 16, color = "currentColor", className, strokeWidth }) {
+  return (<svg {...svgProps(size, color, strokeWidth, className)}><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>);
+}
+function ClipboardList({ size = 16, color = "currentColor", className, strokeWidth }) {
+  return (<svg {...svgProps(size, color, strokeWidth, className)}><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="15" y2="16"/></svg>);
+}
+function TriangleAlert({ size = 16, color = "currentColor", className, strokeWidth }) {
+  return (<svg {...svgProps(size, color, strokeWidth, className)}><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>);
+}
+function Phone({ size = 16, color = "currentColor", className, strokeWidth }) {
+  return (<svg {...svgProps(size, color, strokeWidth, className)}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>);
+}
+
+
+/* ============================================================
+   CONFIG
+   Paste your Apps Script Web App URL here once deployed.
+   Until then, the app runs on local demo data so you can see
+   the full UI and flows.
+   ============================================================ */
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEq78LUE-Zp6VeDh3loJIFmZVL4wpxilRWDGIx3SVsmD5O3HprVvONduPGQy8v09ee/exec"; // e.g. "https://script.google.com/macros/s/XXXX/exec"
+
+/* ---------------- Design tokens ---------------- */
+const STATUS_ORDER = ["New", "Assigned", "Scheduled", "In Progress", "Resolved", "Closed"];
+const STATUS_STYLE = {
+  New: { bg: "#26313F", text: "#8FD3FF", dot: "#4FB8FF" },
+  Assigned: { bg: "#2A2A1E", text: "#F0D27A", dot: "#F5C244" },
+  Scheduled: { bg: "#1E2A26", text: "#7FE0C4", dot: "#38C89A" },
+  "In Progress": { bg: "#2B2418", text: "#F5A623", dot: "#F5A623" },
+  Resolved: { bg: "#1D2A1E", text: "#8DD98F", dot: "#4CAF50" },
+  Closed: { bg: "#22262C", text: "#8B94A3", dot: "#8B94A3" },
+};
+const PRIORITY_STYLE = {
+  Low: { text: "#8B94A3", bar: "#3A4250" },
+  Medium: { text: "#8FD3FF", bar: "#4FB8FF" },
+  High: { text: "#F5A623", bar: "#F5A623" },
+  Urgent: { text: "#FF6B5E", bar: "#FF6B5E" },
+};
+
+const ISSUE_CATEGORIES = ["Hardware", "Software", "Calibration", "Training", "Other"];
+const PRIORITIES = ["Low", "Medium", "High", "Urgent"];
+
+/* ---------------- Demo data (used until APPS_SCRIPT_URL is set) ---------------- */
+const DEMO_TECHS = [
+  { "Tech Name": "M. Reyes", Email: "mreyes@sitech.com" },
+  { "Tech Name": "A. Chen", Email: "achen@sitech.com" },
+  { "Tech Name": "J. Patel", Email: "jpatel@sitech.com" },
+  { "Tech Name": "T. Nguyen", Email: "tnguyen@sitech.com" },
+];
+const DEMO_COMPANIES = [
+  { "Company Name": "Rocky Mountain Excavation" },
+  { "Company Name": "Highline Grading Co." },
+  { "Company Name": "Peak Contractors" },
+  { "Company Name": "Summit Earthworks" },
+];
+const DEMO_REQUESTS = [
+  { "Request ID": "SR-0001", "Submitted By": "jsmith@sitech.com", "Date Submitted": "2026-07-01T08:15:00", "Company": "Rocky Mountain Excavation", "Site / Location": "North Pit — Phase 2", "Contact Name": "Dave Simmons", "Contact Phone": "(303) 555-0142", "Equipment / Model": "Trimble GCS900 Base Station", "Issue Category": "Hardware", Priority: "High", Description: "Base station not broadcasting correction signal on site.", Status: "New", "Assigned Tech": "", "Scheduled Start": "", "Scheduled End": "", "Resolution Notes": "", "Last Updated": "2026-07-01T08:15:00" },
+  { "Request ID": "SR-0002", "Submitted By": "dtorres@sitech.com", "Date Submitted": "2026-07-02T10:30:00", "Company": "Highline Grading Co.", "Site / Location": "Riverside Development", "Contact Name": "Maria Lopez", "Contact Phone": "(720) 555-0198", "Equipment / Model": "SPS986 GPS Receiver", "Issue Category": "Calibration", Priority: "Medium", Description: "Receiver drifting ~3cm out of tolerance after firmware update.", Status: "Assigned", "Assigned Tech": "M. Reyes", "Scheduled Start": "", "Scheduled End": "", "Resolution Notes": "", "Last Updated": "2026-07-02T14:00:00" },
+  { "Request ID": "SR-0003", "Submitted By": "kwilson@sitech.com", "Date Submitted": "2026-07-03T13:00:00", "Company": "Peak Contractors", "Site / Location": "Summit Ridge Subdivision", "Contact Name": "Tom Bakker", "Contact Phone": "(970) 555-0177", "Equipment / Model": "Earthworks Grade Control Software", "Issue Category": "Software", Priority: "Low", Description: "Operator requesting refresher training on 3D design import.", Status: "Scheduled", "Assigned Tech": "A. Chen", "Scheduled Start": "2026-07-10T09:00:00", "Scheduled End": "2026-07-10T11:00:00", "Resolution Notes": "", "Last Updated": "2026-07-03T15:20:00" },
+  { "Request ID": "SR-0004", "Submitted By": "rlopez@sitech.com", "Date Submitted": "2026-07-04T09:05:00", "Company": "Summit Earthworks", "Site / Location": "Highway 40 Grading Site", "Contact Name": "Janet Cole", "Contact Phone": "(303) 555-0163", "Equipment / Model": "SNM941 Radio", "Issue Category": "Hardware", Priority: "Urgent", Description: "Radio link dropping constantly, machine control down on active grading job.", Status: "In Progress", "Assigned Tech": "J. Patel", "Scheduled Start": "2026-07-06T07:30:00", "Scheduled End": "2026-07-08T16:00:00", "Resolution Notes": "", "Last Updated": "2026-07-05T11:00:00" },
+  { "Request ID": "SR-0005", "Submitted By": "mkane@sitech.com", "Date Submitted": "2026-06-28T16:40:00", "Company": "Rocky Mountain Excavation", "Site / Location": "North Pit — Phase 2", "Contact Name": "Dave Simmons", "Contact Phone": "(303) 555-0142", "Equipment / Model": "TSC7 Controller", "Issue Category": "Software", Priority: "Medium", Description: "App crashing on startup after last OS update.", Status: "Resolved", "Assigned Tech": "T. Nguyen", "Scheduled Start": "2026-06-30T13:00:00", "Scheduled End": "2026-06-30T14:00:00", "Resolution Notes": "Reinstalled Siteworks, confirmed stable.", "Last Updated": "2026-06-30T15:30:00" },
+];
+
+/* ---------------- API layer ---------------- */
+const isDemo = !APPS_SCRIPT_URL;
+
+async function apiList() {
+  if (isDemo) return [...DEMO_REQUESTS];
+  const res = await fetch(`${APPS_SCRIPT_URL}?action=list`);
+  return res.json();
+}
+async function apiTechs() {
+  if (isDemo) return [...DEMO_TECHS];
+  const res = await fetch(`${APPS_SCRIPT_URL}?action=techs`);
+  return res.json();
+}
+async function apiCompanies() {
+  if (isDemo) return [...DEMO_COMPANIES];
+  const res = await fetch(`${APPS_SCRIPT_URL}?action=companies`);
+  return res.json();
+}
+async function apiCreate(data) {
+  if (isDemo) {
+    const requestId = "SR-" + String(DEMO_REQUESTS.length + 1).padStart(4, "0");
+    const now = new Date().toISOString();
+    const companyExists = DEMO_COMPANIES.some(c => c["Company Name"].trim().toLowerCase() === (data.company || "").trim().toLowerCase());
+    if (data.company && !companyExists) {
+      DEMO_COMPANIES.push({ "Company Name": data.company.trim() });
+    }
+    DEMO_REQUESTS.push({
+      "Request ID": requestId, "Submitted By": "you@sitech.com", "Date Submitted": now,
+      "Company": data.company || "", "Site / Location": data.site || "",
+      "Contact Name": data.contactName || "", "Contact Phone": data.contactPhone || "",
+      "Equipment / Model": data.equipment || "",
+      "Issue Category": data.issueCategory || "", Priority: data.priority || "Medium",
+      Description: data.description || "", Status: "New", "Assigned Tech": "",
+      "Scheduled Start": "", "Scheduled End": "", "Resolution Notes": "", "Last Updated": now,
+    });
+    return { success: true, requestId };
+  }
+  const res = await fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" }, // avoids CORS preflight against Apps Script
+    body: JSON.stringify({ action: "create", data }),
+  });
+  return res.json();
+}
+async function apiUpdate(id, data) {
+  if (isDemo) {
+    const idx = DEMO_REQUESTS.findIndex(r => r["Request ID"] === id);
+    if (idx === -1) return { success: false, error: "Request ID not found: " + id };
+    DEMO_REQUESTS[idx] = { ...DEMO_REQUESTS[idx], ...data, "Last Updated": new Date().toISOString() };
+    return { success: true };
+  }
+  const res = await fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ action: "update", id, data }),
+  });
+  return res.json();
+}
+
+/* ---------------- Helpers ---------------- */
+function timeAgo(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  const diff = (Date.now() - d.getTime()) / 1000;
+  if (diff < 60) return "just now";
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
+function fmtDateShort(iso) {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d)) return "—";
+  return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+}
+// Converts a stored date into the "YYYY-MM-DDTHH:mm" format a <input type="datetime-local">
+// expects, using LOCAL time components. (Date.toISOString() would convert to UTC instead,
+// shifting the displayed time by the browser's UTC offset — this avoids that.)
+function toLocalInputValue(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (isNaN(d)) return "";
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/* ---------------- UI atoms ---------------- */
+function StatusBadge({ status }) {
+  const s = STATUS_STYLE[status] || STATUS_STYLE.New;
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 px-2 py-1 rounded text-[11px] font-semibold tracking-wide uppercase"
+      style={{ background: s.bg, color: s.text }}
+    >
+      <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.dot }} />
+      {status}
+    </span>
+  );
+}
+function PriorityTag({ priority }) {
+  const p = PRIORITY_STYLE[priority] || PRIORITY_STYLE.Medium;
+  return (
+    <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold tracking-wide uppercase" style={{ color: p.text }}>
+      <span className="w-1 h-3 rounded-sm" style={{ background: p.bar }} />
+      {priority}
+    </span>
+  );
+}
+function IdPlate({ id }) {
+  return (
+    <span
+      className="font-mono text-[12px] tracking-wider px-2 py-1 rounded border"
+      style={{ borderColor: "#3A4250", color: "#F5A623", background: "#1A222C" }}
+    >
+      {id}
+    </span>
+  );
+}
+function StatCard({ label, value, icon: Icon, accent }) {
+  return (
+    <div className="flex-1 min-w-[150px] rounded-xl p-4 border" style={{ background: "#1A222C", borderColor: "#242D3A" }}>
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[11px] font-semibold tracking-widest uppercase" style={{ color: "#8B94A3" }}>{label}</span>
+        <Icon size={16} color={accent || "#8B94A3"} />
+      </div>
+      <div className="text-3xl font-bold" style={{ color: "#E8EAED", fontFamily: "'Oswald', sans-serif" }}>{value}</div>
+    </div>
+  );
+}
+
+/* ---------------- Main App ---------------- */
+function SitechSupportApp() {
+  const [requests, setRequests] = useState([]);
+  const [techs, setTechs] = useState([]);
+  const [companies, setCompanies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [view, setView] = useState("table"); // table | kanban
+  const [currentTab, setCurrentTab] = useState("dashboard"); // dashboard | calendar
+  const [statusFilter, setStatusFilter] = useState("Active");
+  const [priorityFilter, setPriorityFilter] = useState("All");
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [toast, setToast] = useState(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    const [r, t, c] = await Promise.all([apiList(), apiTechs(), apiCompanies()]);
+    setRequests(r || []);
+    setTechs(t || []);
+    setCompanies(c || []);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => { load(); }, [load]);
+
+  useEffect(() => {
+    if (toast) {
+      const t = setTimeout(() => setToast(null), 3000);
+      return () => clearTimeout(t);
+    }
+  }, [toast]);
+
+  const filtered = useMemo(() => {
+    return requests.filter((r) => {
+      if (statusFilter === "Active" && (r.Status === "Resolved" || r.Status === "Closed")) return false;
+      if (statusFilter !== "Active" && statusFilter !== "All" && r.Status !== statusFilter) return false;
+      if (priorityFilter !== "All" && r.Priority !== priorityFilter) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        const hay = `${r["Request ID"]} ${r["Company"]} ${r["Site / Location"]} ${r["Contact Name"]} ${r["Equipment / Model"]} ${r.Description}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [requests, statusFilter, priorityFilter, search]);
+
+  const stats = useMemo(() => {
+    const open = requests.filter(r => r.Status !== "Resolved" && r.Status !== "Closed").length;
+    const urgent = requests.filter(r => (r.Priority === "Urgent" || r.Priority === "High") && r.Status !== "Resolved" && r.Status !== "Closed").length;
+    const weekAgo = Date.now() - 7 * 86400000;
+    const resolvedWeek = requests.filter(r => r.Status === "Resolved" && new Date(r["Last Updated"]).getTime() > weekAgo).length;
+    const scheduled = requests.filter(r => r.Status === "Scheduled" || r.Status === "In Progress").length;
+    return { open, urgent, resolvedWeek, scheduled };
+  }, [requests]);
+
+  const handleCreate = async (formData) => {
+    setSaving(true);
+    const res = await apiCreate(formData);
+    if (res.success) {
+      setToast({ type: "success", msg: `Request ${res.requestId} submitted.` });
+      setShowForm(false);
+      await load();
+    } else {
+      setToast({ type: "error", msg: res.error || "Something went wrong." });
+    }
+    setSaving(false);
+  };
+
+  const handleUpdate = async (id, data) => {
+    setSaving(true);
+    const res = await apiUpdate(id, data);
+    if (res.success) {
+      setToast({ type: "success", msg: `${id} updated.` });
+      setSelected(null);
+      await load();
+    } else {
+      setToast({ type: "error", msg: res.error || "Update failed." });
+    }
+    setSaving(false);
+  };
+
+  return (
+    <div
+      className="w-full min-h-[720px] flex"
+      style={{ background: "#12181F", fontFamily: "'Inter', sans-serif", color: "#E8EAED" }}
+    >
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap');
+      `}</style>
+
+      {/* Sidebar */}
+      <div className="w-56 flex-shrink-0 flex flex-col border-r" style={{ borderColor: "#242D3A", background: "#161D26" }}>
+        <div className="px-5 py-5 border-b" style={{ borderColor: "#242D3A" }}>
+          <div className="text-[11px] tracking-[0.2em] uppercase" style={{ color: "#F5A623" }}>SITECH</div>
+          <div className="text-lg font-bold" style={{ fontFamily: "'Oswald', sans-serif" }}>Support Desk</div>
+        </div>
+        <nav className="flex-1 px-3 py-4 space-y-1">
+          <SidebarItem icon={ClipboardList} label="Dashboard" active={currentTab === "dashboard"} onClick={() => setCurrentTab("dashboard")} />
+          <SidebarItem icon={CalendarDays} label="Calendar" active={currentTab === "calendar"} onClick={() => setCurrentTab("calendar")} />
+        </nav>
+        <div className="p-3">
+          <button
+            onClick={() => setShowForm(true)}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-semibold text-sm transition-transform active:scale-[0.98]"
+            style={{ background: "#F5A623", color: "#12181F" }}
+          >
+            <Plus size={16} strokeWidth={2.5} /> New Request
+          </button>
+        </div>
+      </div>
+
+      {/* Main */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top bar */}
+        <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: "#242D3A" }}>
+          <div>
+            <h1 className="text-xl font-bold" style={{ fontFamily: "'Oswald', sans-serif" }}>
+              {currentTab === "dashboard" ? "Service Requests" : "Dispatch Calendar"}
+            </h1>
+            <p className="text-sm" style={{ color: "#8B94A3" }}>
+              {currentTab === "dashboard" ? "Field support tracking & dispatch" : "Scheduled visits by date"}
+            </p>
+          </div>
+          {isDemo && (
+            <span className="text-[11px] px-2.5 py-1 rounded-full font-medium" style={{ background: "#2A2418", color: "#F5A623" }}>
+              Demo data — connect Apps Script URL to go live
+            </span>
+          )}
+        </div>
+
+        <div className="p-6 space-y-6 overflow-auto flex-1">
+          {currentTab === "dashboard" ? (
+            <>
+              {/* Stats */}
+              <div className="flex gap-4 flex-wrap">
+                <StatCard label="Open Requests" value={stats.open} icon={ClipboardList} accent="#4FB8FF" />
+                <StatCard label="High / Urgent" value={stats.urgent} icon={TriangleAlert} accent="#FF6B5E" />
+                <StatCard label="Scheduled / Active" value={stats.scheduled} icon={Clock} accent="#38C89A" />
+                <StatCard label="Resolved (7d)" value={stats.resolvedWeek} icon={CheckCircle2} accent="#4CAF50" />
+              </div>
+
+              {/* Controls */}
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <FilterSelect
+                    value={statusFilter}
+                    onChange={setStatusFilter}
+                    options={["Active", "All", ...STATUS_ORDER]}
+                  />
+                  <FilterSelect
+                    value={priorityFilter}
+                    onChange={setPriorityFilter}
+                    options={["All", ...PRIORITIES]}
+                  />
+                  <div className="relative">
+                    <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2" color="#8B94A3" />
+                    <input
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Search site, equipment, description…"
+                      className="pl-8 pr-3 py-2 rounded-lg text-sm outline-none w-72"
+                      style={{ background: "#1A222C", border: "1px solid #242D3A", color: "#E8EAED" }}
+                    />
+                  </div>
+                </div>
+                <div className="flex rounded-lg overflow-hidden border" style={{ borderColor: "#242D3A" }}>
+                  <ViewToggleBtn active={view === "table"} onClick={() => setView("table")} icon={List} />
+                  <ViewToggleBtn active={view === "kanban"} onClick={() => setView("kanban")} icon={LayoutGrid} />
+                </div>
+              </div>
+
+              {/* Content */}
+              {loading ? (
+                <div className="flex items-center justify-center py-24" style={{ color: "#8B94A3" }}>
+                  <Loader2 className="animate-spin mr-2" size={18} /> Loading requests…
+                </div>
+              ) : filtered.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-24 text-center" style={{ color: "#8B94A3" }}>
+                  <ClipboardList size={32} className="mb-3 opacity-50" />
+                  <p className="font-medium" style={{ color: "#E8EAED" }}>No requests match these filters</p>
+                  <p className="text-sm mt-1">Try clearing a filter or search term.</p>
+                </div>
+              ) : view === "table" ? (
+                <TableView requests={filtered} onSelect={setSelected} />
+              ) : (
+                <KanbanView requests={filtered} onSelect={setSelected} />
+              )}
+            </>
+          ) : (
+            <CalendarView requests={requests} onSelect={setSelected} loading={loading} />
+          )}
+        </div>
+      </div>
+
+      {/* New request modal */}
+      {showForm && (
+        <NewRequestModal
+          companies={companies}
+          onClose={() => setShowForm(false)}
+          onSubmit={handleCreate}
+          saving={saving}
+        />
+      )}
+
+      {/* Detail drawer */}
+      {selected && (
+        <DetailDrawer
+          request={selected}
+          techs={techs}
+          onClose={() => setSelected(null)}
+          onSave={handleUpdate}
+          saving={saving}
+        />
+      )}
+
+      {/* Toast */}
+      {toast && (
+        <div
+          className="fixed bottom-6 right-6 px-4 py-3 rounded-lg shadow-lg text-sm font-medium z-50"
+          style={{
+            background: toast.type === "error" ? "#3A1F1C" : "#1E2A26",
+            color: toast.type === "error" ? "#FF6B5E" : "#7FE0C4",
+            border: `1px solid ${toast.type === "error" ? "#5A2F2A" : "#2A4A3E"}`,
+          }}
+        >
+          {toast.msg}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------------- Subcomponents ---------------- */
+function SidebarItem({ icon: Icon, label, active, onClick }) {
+  return (
+    <div
+      onClick={onClick}
+      className="flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium cursor-pointer"
+      style={{ background: active ? "#242D3A" : "transparent", color: active ? "#F5A623" : "#8B94A3" }}
+    >
+      <Icon size={16} />
+      {label}
+    </div>
+  );
+}
+
+function FilterSelect({ value, onChange, options }) {
+  return (
+    <div className="relative">
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="appearance-none pl-3 pr-8 py-2 rounded-lg text-sm font-medium outline-none cursor-pointer"
+        style={{ background: "#1A222C", border: "1px solid #242D3A", color: "#E8EAED" }}
+      >
+        {options.map((o) => <option key={o} value={o}>{o}</option>)}
+      </select>
+      <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" color="#8B94A3" />
+    </div>
+  );
+}
+
+function ViewToggleBtn({ active, onClick, icon: Icon }) {
+  return (
+    <button
+      onClick={onClick}
+      className="px-3 py-2 flex items-center"
+      style={{ background: active ? "#242D3A" : "#1A222C", color: active ? "#F5A623" : "#8B94A3" }}
+    >
+      <Icon size={16} />
+    </button>
+  );
+}
+
+function TableView({ requests, onSelect }) {
+  return (
+    <div className="rounded-xl border overflow-hidden" style={{ borderColor: "#242D3A" }}>
+      <table className="w-full text-sm">
+        <thead>
+          <tr style={{ background: "#161D26" }}>
+            {["Request", "Company", "Equipment", "Priority", "Status", "Assigned", "Updated"].map((h) => (
+              <th key={h} className="text-left px-4 py-3 text-[11px] font-semibold tracking-widest uppercase" style={{ color: "#8B94A3" }}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {requests.map((r) => (
+            <tr
+              key={r["Request ID"]}
+              onClick={() => onSelect(r)}
+              className="cursor-pointer transition-colors"
+              style={{ borderTop: "1px solid #242D3A" }}
+              onMouseEnter={(e) => e.currentTarget.style.background = "#1A222C"}
+              onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+            >
+              <td className="px-4 py-3"><IdPlate id={r["Request ID"]} /></td>
+              <td className="px-4 py-3">
+                <div className="flex items-center gap-1.5" style={{ color: "#E8EAED" }}>
+                  <MapPin size={12} color="#8B94A3" /> {r["Company"] || "—"}
+                </div>
+                {r["Site / Location"] && (
+                  <div className="text-xs mt-0.5" style={{ color: "#8B94A3" }}>{r["Site / Location"]}</div>
+                )}
+              </td>
+              <td className="px-4 py-3" style={{ color: "#8B94A3" }}>{r["Equipment / Model"] || "—"}</td>
+              <td className="px-4 py-3"><PriorityTag priority={r.Priority} /></td>
+              <td className="px-4 py-3"><StatusBadge status={r.Status} /></td>
+              <td className="px-4 py-3" style={{ color: "#8B94A3" }}>
+                {r["Assigned Tech"] ? (
+                  <span className="flex items-center gap-1.5"><User size={12} /> {r["Assigned Tech"]}</span>
+                ) : "Unassigned"}
+              </td>
+              <td className="px-4 py-3" style={{ color: "#8B94A3" }}>{timeAgo(r["Last Updated"])}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function KanbanView({ requests, onSelect }) {
+  const cols = STATUS_ORDER.filter(s => s !== "Closed");
+  return (
+    <div className="flex gap-4 overflow-x-auto pb-2">
+      {cols.map((status) => {
+        const items = requests.filter(r => r.Status === status);
+        const s = STATUS_STYLE[status];
+        return (
+          <div key={status} className="flex-shrink-0 w-64">
+            <div className="flex items-center gap-2 mb-3 px-1">
+              <span className="w-2 h-2 rounded-full" style={{ background: s.dot }} />
+              <span className="text-[11px] font-semibold tracking-widest uppercase" style={{ color: "#8B94A3" }}>{status}</span>
+              <span className="text-[11px]" style={{ color: "#8B94A3" }}>({items.length})</span>
+            </div>
+            <div className="space-y-2">
+              {items.map((r) => (
+                <div
+                  key={r["Request ID"]}
+                  onClick={() => onSelect(r)}
+                  className="p-3 rounded-lg border cursor-pointer"
+                  style={{ background: "#1A222C", borderColor: "#242D3A" }}
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <IdPlate id={r["Request ID"]} />
+                    <PriorityTag priority={r.Priority} />
+                  </div>
+                  <div className="text-sm font-medium mb-1" style={{ color: "#E8EAED" }}>{r["Company"]}</div>
+                  {r["Site / Location"] && (
+                    <div className="text-xs mb-1" style={{ color: "#8B94A3" }}>{r["Site / Location"]}</div>
+                  )}
+                  <div className="text-xs mb-2" style={{ color: "#8B94A3" }}>{r["Equipment / Model"]}</div>
+                  {r["Assigned Tech"] && (
+                    <div className="text-xs flex items-center gap-1" style={{ color: "#8B94A3" }}>
+                      <User size={11} /> {r["Assigned Tech"]}
+                    </div>
+                  )}
+                </div>
+              ))}
+              {items.length === 0 && (
+                <div className="text-xs text-center py-6 rounded-lg border border-dashed" style={{ borderColor: "#242D3A", color: "#4A5262" }}>
+                  Empty
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function NewRequestModal({ companies, onClose, onSubmit, saving }) {
+  const [form, setForm] = useState({
+    company: "", site: "", contactName: "", contactPhone: "",
+    equipment: "", issueCategory: ISSUE_CATEGORIES[0], priority: "Medium", description: "",
+  });
+  const set = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+  const valid = form.company && form.equipment && form.description;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: "rgba(10,13,17,0.7)" }}>
+      <div className="w-full max-w-lg rounded-xl border" style={{ background: "#161D26", borderColor: "#242D3A" }}>
+        <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "#242D3A" }}>
+          <h2 className="font-bold text-lg" style={{ fontFamily: "'Oswald', sans-serif" }}>New Support Request</h2>
+          <button onClick={onClose}><X size={18} color="#8B94A3" /></button>
+        </div>
+        <div className="p-5 space-y-4 max-h-[70vh] overflow-auto">
+          <Field label="Company">
+            <input
+              list="companies-list"
+              value={form.company}
+              onChange={(e) => set("company", e.target.value)}
+              placeholder="Select existing, or type a new company name"
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+              style={{ background: "#1A222C", border: "1px solid #242D3A", color: "#E8EAED" }}
+            />
+            <datalist id="companies-list">
+              {companies.map((c) => <option key={c["Company Name"]} value={c["Company Name"]} />)}
+            </datalist>
+            <p className="text-[11px] mt-1" style={{ color: "#5C6577" }}>
+              New company names are added to the list automatically.
+            </p>
+          </Field>
+          <Field label="Site / Location">
+            <input
+              value={form.site}
+              onChange={(e) => set("site", e.target.value)}
+              placeholder="e.g. North Pit — Phase 2"
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+              style={{ background: "#1A222C", border: "1px solid #242D3A", color: "#E8EAED" }}
+            />
+          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Contact Name">
+              <input
+                value={form.contactName}
+                onChange={(e) => set("contactName", e.target.value)}
+                placeholder="Who to reach on site"
+                className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                style={{ background: "#1A222C", border: "1px solid #242D3A", color: "#E8EAED" }}
+              />
+            </Field>
+            <Field label="Contact Phone">
+              <input
+                type="tel"
+                value={form.contactPhone}
+                onChange={(e) => set("contactPhone", e.target.value)}
+                placeholder="(555) 555-5555"
+                className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                style={{ background: "#1A222C", border: "1px solid #242D3A", color: "#E8EAED" }}
+              />
+            </Field>
+          </div>
+          <Field label="Equipment / Model">
+            <input
+              value={form.equipment}
+              onChange={(e) => set("equipment", e.target.value)}
+              placeholder="e.g. Trimble GCS900 Base Station"
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+              style={{ background: "#1A222C", border: "1px solid #242D3A", color: "#E8EAED" }}
+            />
+          </Field>
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Issue Category">
+              <select
+                value={form.issueCategory}
+                onChange={(e) => set("issueCategory", e.target.value)}
+                className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                style={{ background: "#1A222C", border: "1px solid #242D3A", color: "#E8EAED" }}
+              >
+                {ISSUE_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </Field>
+            <Field label="Priority">
+              <select
+                value={form.priority}
+                onChange={(e) => set("priority", e.target.value)}
+                className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                style={{ background: "#1A222C", border: "1px solid #242D3A", color: "#E8EAED" }}
+              >
+                {PRIORITIES.map((p) => <option key={p} value={p}>{p}</option>)}
+              </select>
+            </Field>
+          </div>
+          <Field label="Description">
+            <textarea
+              value={form.description}
+              onChange={(e) => set("description", e.target.value)}
+              rows={4}
+              placeholder="Describe the issue…"
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none resize-none"
+              style={{ background: "#1A222C", border: "1px solid #242D3A", color: "#E8EAED" }}
+            />
+          </Field>
+        </div>
+        <div className="flex justify-end gap-2 px-5 py-4 border-t" style={{ borderColor: "#242D3A" }}>
+          <button onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-medium" style={{ color: "#8B94A3" }}>Cancel</button>
+          <button
+            disabled={!valid || saving}
+            onClick={() => onSubmit(form)}
+            className="px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 disabled:opacity-50"
+            style={{ background: "#F5A623", color: "#12181F" }}
+          >
+            {saving && <Loader2 size={14} className="animate-spin" />} Submit Request
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DetailDrawer({ request, techs, onClose, onSave, saving }) {
+  const [status, setStatus] = useState(request.Status);
+  const [assignedTech, setAssignedTech] = useState(request["Assigned Tech"] || "");
+  const [scheduledStart, setScheduledStart] = useState(toLocalInputValue(request["Scheduled Start"]));
+  const [scheduledEnd, setScheduledEnd] = useState(toLocalInputValue(request["Scheduled End"]));
+  const [notes, setNotes] = useState(request["Resolution Notes"] || "");
+  const [siteLocation, setSiteLocation] = useState(request["Site / Location"] || "");
+  const [contactName, setContactName] = useState(request["Contact Name"] || "");
+  const [contactPhone, setContactPhone] = useState(request["Contact Phone"] || "");
+  const [description, setDescription] = useState(request["Description"] || "");
+
+  const save = () => {
+    onSave(request["Request ID"], {
+      Status: status,
+      "Assigned Tech": assignedTech,
+      "Scheduled Start": scheduledStart ? new Date(scheduledStart).toISOString() : "",
+      "Scheduled End": scheduledEnd ? new Date(scheduledEnd).toISOString() : "",
+      "Resolution Notes": notes,
+      "Site / Location": siteLocation,
+      "Contact Name": contactName,
+      "Contact Phone": contactPhone,
+      "Description": description,
+    });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex justify-end" style={{ background: "rgba(10,13,17,0.6)" }} onClick={onClose}>
+      <div
+        className="w-full max-w-md h-full overflow-auto border-l"
+        style={{ background: "#161D26", borderColor: "#242D3A" }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b" style={{ borderColor: "#242D3A" }}>
+          <IdPlate id={request["Request ID"]} />
+          <button onClick={onClose}><X size={18} color="#8B94A3" /></button>
+        </div>
+
+        <div className="p-5 space-y-5">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <PriorityTag priority={request.Priority} />
+              <StatusBadge status={request.Status} />
+            </div>
+            <h3 className="text-lg font-bold mt-2" style={{ fontFamily: "'Oswald', sans-serif" }}>{request["Company"]}</h3>
+            <p className="text-sm flex items-center gap-1.5 mt-1" style={{ color: "#8B94A3" }}>
+              <Wrench size={13} /> {request["Equipment / Model"]}
+            </p>
+          </div>
+
+          <div className="text-xs space-y-1" style={{ color: "#8B94A3" }}>
+            <div>Submitted by {request["Submitted By"]}</div>
+            <div>{fmtDateShort(request["Date Submitted"])} · {request["Issue Category"]}</div>
+          </div>
+
+          <div className="h-px" style={{ background: "#242D3A" }} />
+
+          <Field label="Site / Location">
+            <div className="relative">
+              <MapPin size={14} className="absolute left-3 top-1/2 -translate-y-1/2" color="#8B94A3" />
+              <input
+                value={siteLocation}
+                onChange={(e) => setSiteLocation(e.target.value)}
+                placeholder="e.g. North Pit — Phase 2"
+                className="w-full pl-9 pr-3 py-2 rounded-lg text-sm outline-none"
+                style={{ background: "#1A222C", border: "1px solid #242D3A", color: "#E8EAED" }}
+              />
+            </div>
+          </Field>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Contact Name">
+              <input
+                value={contactName}
+                onChange={(e) => setContactName(e.target.value)}
+                placeholder="Who to reach on site"
+                className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                style={{ background: "#1A222C", border: "1px solid #242D3A", color: "#E8EAED" }}
+              />
+            </Field>
+            <Field label="Contact Phone">
+              <input
+                type="tel"
+                value={contactPhone}
+                onChange={(e) => setContactPhone(e.target.value)}
+                placeholder="(555) 555-5555"
+                className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                style={{ background: "#1A222C", border: "1px solid #242D3A", color: "#E8EAED" }}
+              />
+            </Field>
+          </div>
+
+          <Field label="Description">
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none resize-none"
+              style={{ background: "#1A222C", border: "1px solid #242D3A", color: "#E8EAED" }}
+            />
+          </Field>
+
+          <div className="h-px" style={{ background: "#242D3A" }} />
+
+          <Field label="Status">
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+              style={{ background: "#1A222C", border: "1px solid #242D3A", color: "#E8EAED" }}
+            >
+              {STATUS_ORDER.map((s) => <option key={s} value={s}>{s}</option>)}
+            </select>
+          </Field>
+
+          <Field label="Assigned Tech">
+            <select
+              value={assignedTech}
+              onChange={(e) => setAssignedTech(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+              style={{ background: "#1A222C", border: "1px solid #242D3A", color: "#E8EAED" }}
+            >
+              <option value="">Unassigned</option>
+              {techs.map((t) => <option key={t["Tech Name"]} value={t["Tech Name"]}>{t["Tech Name"]}</option>)}
+            </select>
+          </Field>
+
+          <Field label="Scheduled Start">
+            <div className="relative">
+              <CalendarIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2" color="#8B94A3" />
+              <input
+                type="datetime-local"
+                value={scheduledStart}
+                onChange={(e) => setScheduledStart(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 rounded-lg text-sm outline-none"
+                style={{ background: "#1A222C", border: "1px solid #242D3A", color: "#E8EAED" }}
+              />
+            </div>
+          </Field>
+
+          <Field label="Scheduled End">
+            <div className="relative">
+              <CalendarIcon size={14} className="absolute left-3 top-1/2 -translate-y-1/2" color="#8B94A3" />
+              <input
+                type="datetime-local"
+                value={scheduledEnd}
+                onChange={(e) => setScheduledEnd(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 rounded-lg text-sm outline-none"
+                style={{ background: "#1A222C", border: "1px solid #242D3A", color: "#E8EAED" }}
+              />
+            </div>
+          </Field>
+
+          {request["Calendar Event ID"] && (
+            <p className="text-xs flex items-center gap-1.5" style={{ color: "#7FE0C4" }}>
+              <CheckCircle2 size={12} /> Synced to Google Calendar
+            </p>
+          )}
+
+          <Field label="Resolution Notes">
+            <textarea
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+              placeholder="Add notes when resolving…"
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none resize-none"
+              style={{ background: "#1A222C", border: "1px solid #242D3A", color: "#E8EAED" }}
+            />
+          </Field>
+
+          <button
+            onClick={save}
+            disabled={saving}
+            className="w-full py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+            style={{ background: "#F5A623", color: "#12181F" }}
+          >
+            {saving && <Loader2 size={14} className="animate-spin" />} Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function getMonday(date) {
+  const d = new Date(date);
+  const day = d.getDay(); // 0 = Sun, 1 = Mon, ... 6 = Sat
+  const diff = day === 0 ? -6 : 1 - day; // shift Sunday back to previous Monday
+  d.setDate(d.getDate() + diff);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+function addDays(date, n) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + n);
+  return d;
+}
+function sameDay(a, b) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+function dateOnly(d) {
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+}
+// Returns { totalDays, dayIndex, isMultiDay } describing where `day` falls
+// within a request's Scheduled Start–End span (by calendar date, not time).
+function spanInfo(r, day) {
+  const start = new Date(r["Scheduled Start"]);
+  const end = r["Scheduled End"] ? new Date(r["Scheduled End"]) : start;
+  const spanStart = dateOnly(start);
+  const spanEnd = dateOnly(end);
+  const totalDays = Math.round((spanEnd - spanStart) / 86400000) + 1;
+  const dayIndex = Math.round((dateOnly(day) - spanStart) / 86400000) + 1;
+  return { totalDays: Math.max(totalDays, 1), dayIndex, isMultiDay: totalDays > 1 };
+}
+
+function CalendarView({ requests, onSelect, loading }) {
+  const [cursor, setCursor] = useState(new Date());
+
+  // Any request with a Scheduled Start shows on the calendar, regardless of
+  // status — Resolved/Closed jobs stay visible here for future reference,
+  // even though they've dropped off the main dashboard.
+  const scheduled = useMemo(
+    () => requests.filter(r => r["Scheduled Start"]),
+    [requests]
+  );
+
+  const monday = getMonday(cursor);
+  const weekDays = [0, 1, 2, 3, 4].map((n) => addDays(monday, n)); // Mon–Fri only
+  const today = new Date();
+
+  // A multi-day job (Scheduled Start through Scheduled End) appears on every
+  // day it spans, not just its start day.
+  const itemsForDay = (day) =>
+    scheduled
+      .filter((r) => {
+        const start = new Date(r["Scheduled Start"]);
+        if (isNaN(start)) return false;
+        const end = r["Scheduled End"] ? new Date(r["Scheduled End"]) : start;
+        const d = dateOnly(day);
+        return d >= dateOnly(start) && d <= dateOnly(end);
+      })
+      .sort((a, b) => new Date(a["Scheduled Start"]) - new Date(b["Scheduled Start"]));
+
+  const weekLabel = () => {
+    const start = weekDays[0];
+    const end = weekDays[4];
+    const sameMonth = start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear();
+    const startStr = start.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+    if (sameMonth) {
+      return `${startStr} – ${end.getDate()}, ${end.getFullYear()}`;
+    }
+    const endStr = end.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+    return `${startStr} – ${endStr}`;
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-24" style={{ color: "#8B94A3" }}>
+        <Loader2 className="animate-spin mr-2" size={18} /> Loading calendar…
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border p-4" style={{ background: "#1A222C", borderColor: "#242D3A" }}>
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <button onClick={() => setCursor(addDays(monday, -7))} className="p-1.5 rounded-lg" style={{ background: "#242D3A" }}>
+            <ChevronLeft size={16} color="#8B94A3" />
+          </button>
+          <div className="font-bold text-base min-w-[170px] text-center" style={{ fontFamily: "'Oswald', sans-serif" }}>
+            {weekLabel()}
+          </div>
+          <button onClick={() => setCursor(addDays(monday, 7))} className="p-1.5 rounded-lg" style={{ background: "#242D3A" }}>
+            <ChevronRight size={16} color="#8B94A3" />
+          </button>
+        </div>
+        <button
+          onClick={() => setCursor(new Date())}
+          className="px-3 py-1.5 rounded-lg text-xs font-semibold"
+          style={{ background: "#242D3A", color: "#F5A623" }}
+        >
+          Today
+        </button>
+      </div>
+
+      <div className="grid grid-cols-5 gap-3">
+        {weekDays.map((day, i) => {
+          const items = itemsForDay(day);
+          const isToday = sameDay(day, today);
+          return (
+            <div key={i} className="min-w-0">
+              <div
+                className="text-center rounded-lg py-2 mb-2"
+                style={{ background: isToday ? "#242D3A" : "transparent", border: isToday ? "1px solid #F5A623" : "1px solid transparent" }}
+              >
+                <div className="text-[11px] font-semibold tracking-widest uppercase" style={{ color: "#8B94A3" }}>
+                  {day.toLocaleDateString(undefined, { weekday: "short" })}
+                </div>
+                <div className="text-sm font-bold" style={{ color: isToday ? "#F5A623" : "#E8EAED", fontFamily: "'Oswald', sans-serif" }}>
+                  {day.toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                </div>
+              </div>
+
+              <div className="space-y-2 min-h-[80px]">
+                {items.length === 0 ? (
+                  <div className="text-xs text-center py-6 rounded-lg border border-dashed" style={{ borderColor: "#242D3A", color: "#4A5262" }}>
+                    —
+                  </div>
+                ) : (
+                  items.map((r) => {
+                    const { totalDays, dayIndex, isMultiDay } = spanInfo(r, day);
+                    let timeLabel;
+                    if (!isMultiDay) {
+                      timeLabel = new Date(r["Scheduled Start"]).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+                    } else if (dayIndex === 1) {
+                      timeLabel = "Starts " + new Date(r["Scheduled Start"]).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+                    } else if (dayIndex === totalDays) {
+                      timeLabel = "Ends " + new Date(r["Scheduled End"]).toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+                    } else {
+                      timeLabel = "All day";
+                    }
+                    return (
+                      <div
+                        key={r["Request ID"] + "-" + i}
+                        onClick={() => onSelect(r)}
+                        className="p-2.5 rounded-lg border cursor-pointer"
+                        style={{ background: "#161D26", borderColor: PRIORITY_STYLE[r.Priority]?.bar || "#242D3A", borderLeftWidth: "3px" }}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-[10px] font-mono" style={{ color: "#F5A623" }}>{r["Request ID"]}</span>
+                          <span className="text-[10px] font-semibold" style={{ color: "#8B94A3" }}>{timeLabel}</span>
+                        </div>
+                        <div className="text-xs font-medium mb-1 truncate" style={{ color: "#E8EAED" }}>{r["Company"]}</div>
+                        {isMultiDay && (
+                          <div className="text-[10px] mb-1 font-semibold" style={{ color: "#F5A623" }}>
+                            Day {dayIndex} of {totalDays}
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between gap-1">
+                          {r["Assigned Tech"] ? (
+                            <span className="text-[10px] flex items-center gap-1 truncate" style={{ color: "#8B94A3" }}>
+                              <User size={10} /> {r["Assigned Tech"]}
+                            </span>
+                          ) : <span />}
+                          <StatusBadge status={r.Status} />
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function Field({ label, children }) {
+  return (
+    <div>
+      <label className="block text-[11px] font-semibold tracking-widest uppercase mb-1.5" style={{ color: "#8B94A3" }}>{label}</label>
+      {children}
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<SitechSupportApp />);
+
+</script>
+</body>
+</html>
