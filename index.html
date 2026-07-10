@@ -246,6 +246,36 @@ function toLocalInputValue(iso) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+/* ---------------- Session persistence ----------------
+   Remembers a successful login in this browser for a limited window, so
+   reloading the page (or reopening the file) within that window skips the
+   login screen. This only remembers "this browser logged in recently" —
+   not who specifically — and is stored client-side only, nothing sent
+   anywhere. Clears itself once the window passes, or on manual logout. */
+const SESSION_STORAGE_KEY = "sitech_support_session";
+const SESSION_DURATION_MS = 8 * 60 * 60 * 1000; // 8 hours
+
+function hasValidSession() {
+  try {
+    const raw = localStorage.getItem(SESSION_STORAGE_KEY);
+    if (!raw) return false;
+    const { loggedInAt } = JSON.parse(raw);
+    return Date.now() - loggedInAt < SESSION_DURATION_MS;
+  } catch (err) {
+    return false;
+  }
+}
+function saveSession() {
+  try {
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ loggedInAt: Date.now() }));
+  } catch (err) { /* storage unavailable, e.g. in a sandboxed preview — session just won't persist */ }
+}
+function clearSession() {
+  try {
+    localStorage.removeItem(SESSION_STORAGE_KEY);
+  } catch (err) { /* ignore */ }
+}
+
 /* ---------------- UI atoms ---------------- */
 function StatusBadge({ status }) {
   const s = STATUS_STYLE[status] || STATUS_STYLE.New;
@@ -292,7 +322,7 @@ function StatCard({ label, value, icon: Icon, accent }) {
 
 /* ---------------- Main App ---------------- */
 function SitechSupportApp() {
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(() => hasValidSession());
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginError, setLoginError] = useState(null);
   const [requests, setRequests] = useState([]);
@@ -326,6 +356,7 @@ function SitechSupportApp() {
     const res = await apiLogin(username, password);
     setLoginLoading(false);
     if (res.success) {
+      saveSession();
       setLoggedIn(true);
     } else {
       setLoginError("Incorrect username or password.");
@@ -420,7 +451,7 @@ function SitechSupportApp() {
             <Plus size={16} strokeWidth={2.5} /> New Request
           </button>
           <button
-            onClick={() => setLoggedIn(false)}
+            onClick={() => { clearSession(); setLoggedIn(false); }}
             className="w-full flex items-center justify-center gap-2 py-2 rounded-lg font-medium text-xs"
             style={{ background: "transparent", color: "#8B94A3" }}
           >
