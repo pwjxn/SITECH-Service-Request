@@ -81,6 +81,12 @@ function TriangleAlert({ size = 16, color = "currentColor", className, strokeWid
 function Phone({ size = 16, color = "currentColor", className, strokeWidth }) {
   return (<svg {...svgProps(size, color, strokeWidth, className)}><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>);
 }
+function LogOut({ size = 16, color = "currentColor", className, strokeWidth }) {
+  return (<svg {...svgProps(size, color, strokeWidth, className)}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>);
+}
+function Lock({ size = 16, color = "currentColor", className, strokeWidth }) {
+  return (<svg {...svgProps(size, color, strokeWidth, className)}><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>);
+}
 
 
 /* ============================================================
@@ -89,7 +95,7 @@ function Phone({ size = 16, color = "currentColor", className, strokeWidth }) {
    Until then, the app runs on local demo data so you can see
    the full UI and flows.
    ============================================================ */
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwEq78LUE-Zp6VeDh3loJIFmZVL4wpxilRWDGIx3SVsmD5O3HprVvONduPGQy8v09ee/exec"; // e.g. "https://script.google.com/macros/s/XXXX/exec"
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyopz1JsJ5NE6WGtheOKKVcyBmF3dxhFbDwmnkA33Esq_k6xHsGdYiPvEe8SHq76IpR/exec"; // e.g. "https://script.google.com/macros/s/XXXX/exec"
 
 /* ---------------- Design tokens ---------------- */
 const STATUS_ORDER = ["New", "Assigned", "Scheduled", "In Progress", "Resolved", "Closed"];
@@ -130,6 +136,12 @@ const DEMO_REQUESTS = [
   { "Request ID": "SR-0003", "Submitted By": "kwilson@sitech.com", "Date Submitted": "2026-07-03T13:00:00", "Company": "Peak Contractors", "Site / Location": "Summit Ridge Subdivision", "Contact Name": "Tom Bakker", "Contact Phone": "(970) 555-0177", "Equipment / Model": "Earthworks Grade Control Software", "Issue Category": "Software", Priority: "Low", Description: "Operator requesting refresher training on 3D design import.", Status: "Scheduled", "Assigned Tech": "A. Chen", "Scheduled Start": "2026-07-10T09:00:00", "Scheduled End": "2026-07-10T11:00:00", "Resolution Notes": "", "Last Updated": "2026-07-03T15:20:00" },
   { "Request ID": "SR-0004", "Submitted By": "rlopez@sitech.com", "Date Submitted": "2026-07-04T09:05:00", "Company": "Summit Earthworks", "Site / Location": "Highway 40 Grading Site", "Contact Name": "Janet Cole", "Contact Phone": "(303) 555-0163", "Equipment / Model": "SNM941 Radio", "Issue Category": "Hardware", Priority: "Urgent", Description: "Radio link dropping constantly, machine control down on active grading job.", Status: "In Progress", "Assigned Tech": "J. Patel", "Scheduled Start": "2026-07-06T07:30:00", "Scheduled End": "2026-07-08T16:00:00", "Resolution Notes": "", "Last Updated": "2026-07-05T11:00:00" },
   { "Request ID": "SR-0005", "Submitted By": "mkane@sitech.com", "Date Submitted": "2026-06-28T16:40:00", "Company": "Rocky Mountain Excavation", "Site / Location": "North Pit — Phase 2", "Contact Name": "Dave Simmons", "Contact Phone": "(303) 555-0142", "Equipment / Model": "TSC7 Controller", "Issue Category": "Software", Priority: "Medium", Description: "App crashing on startup after last OS update.", Status: "Resolved", "Assigned Tech": "T. Nguyen", "Scheduled Start": "2026-06-30T13:00:00", "Scheduled End": "2026-06-30T14:00:00", "Resolution Notes": "Reinstalled Siteworks, confirmed stable.", "Last Updated": "2026-06-30T15:30:00" },
+];
+// Demo-mode login: try username "demo" / password "demo123" when no
+// APPS_SCRIPT_URL is set. Once connected, this checks the real "Users"
+// tab on your Sheet instead.
+const DEMO_USERS = [
+  { Username: "demo", Password: "demo123" },
 ];
 
 /* ---------------- API layer ---------------- */
@@ -187,6 +199,22 @@ async function apiUpdate(id, data) {
     method: "POST",
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify({ action: "update", id, data }),
+  });
+  return res.json();
+}
+// Checks username/password against the "Users" tab on the Sheet (or the
+// demo user above, when no APPS_SCRIPT_URL is set). This is a lightweight
+// gate meant to keep casual eyes out while this is a concept — passwords
+// are stored and compared in plain text, not meant as strong security.
+async function apiLogin(username, password) {
+  if (isDemo) {
+    const match = DEMO_USERS.find(u => u.Username === username && u.Password === password);
+    return { success: !!match };
+  }
+  const res = await fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ action: "login", username, password }),
   });
   return res.json();
 }
@@ -264,6 +292,9 @@ function StatCard({ label, value, icon: Icon, accent }) {
 
 /* ---------------- Main App ---------------- */
 function SitechSupportApp() {
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginError, setLoginError] = useState(null);
   const [requests, setRequests] = useState([]);
   const [techs, setTechs] = useState([]);
   const [companies, setCompanies] = useState([]);
@@ -287,7 +318,19 @@ function SitechSupportApp() {
     setLoading(false);
   }, []);
 
-  useEffect(() => { load(); }, [load]);
+  useEffect(() => { if (loggedIn) load(); }, [loggedIn, load]);
+
+  const handleLogin = async (username, password) => {
+    setLoginLoading(true);
+    setLoginError(null);
+    const res = await apiLogin(username, password);
+    setLoginLoading(false);
+    if (res.success) {
+      setLoggedIn(true);
+    } else {
+      setLoginError("Incorrect username or password.");
+    }
+  };
 
   useEffect(() => {
     if (toast) {
@@ -345,6 +388,10 @@ function SitechSupportApp() {
     setSaving(false);
   };
 
+  if (!loggedIn) {
+    return <LoginScreen onLogin={handleLogin} loading={loginLoading} error={loginError} />;
+  }
+
   return (
     <div
       className="w-full min-h-[720px] flex"
@@ -364,13 +411,20 @@ function SitechSupportApp() {
           <SidebarItem icon={ClipboardList} label="Dashboard" active={currentTab === "dashboard"} onClick={() => setCurrentTab("dashboard")} />
           <SidebarItem icon={CalendarDays} label="Calendar" active={currentTab === "calendar"} onClick={() => setCurrentTab("calendar")} />
         </nav>
-        <div className="p-3">
+        <div className="p-3 space-y-2">
           <button
             onClick={() => setShowForm(true)}
             className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg font-semibold text-sm transition-transform active:scale-[0.98]"
             style={{ background: "#F5A623", color: "#12181F" }}
           >
             <Plus size={16} strokeWidth={2.5} /> New Request
+          </button>
+          <button
+            onClick={() => setLoggedIn(false)}
+            className="w-full flex items-center justify-center gap-2 py-2 rounded-lg font-medium text-xs"
+            style={{ background: "transparent", color: "#8B94A3" }}
+          >
+            <LogOut size={13} /> Log out
           </button>
         </div>
       </div>
@@ -1162,6 +1216,80 @@ function Field({ label, children }) {
     <div>
       <label className="block text-[11px] font-semibold tracking-widest uppercase mb-1.5" style={{ color: "#8B94A3" }}>{label}</label>
       {children}
+    </div>
+  );
+}
+
+function LoginScreen({ onLogin, loading, error }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+
+  const submit = (e) => {
+    e.preventDefault();
+    if (username && password && !loading) onLogin(username, password);
+  };
+
+  return (
+    <div
+      className="w-full min-h-[720px] flex items-center justify-center p-4"
+      style={{ background: "#12181F", fontFamily: "'Inter', sans-serif", color: "#E8EAED" }}
+    >
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+      `}</style>
+      <div className="w-full max-w-sm">
+        <div className="flex items-center gap-2 mb-6 justify-center">
+          <ClipboardList size={20} color="#F5A623" />
+          <div className="text-center">
+            <div className="text-[11px] tracking-[0.2em] uppercase" style={{ color: "#F5A623" }}>SITECH</div>
+            <div className="text-lg font-bold" style={{ fontFamily: "'Oswald', sans-serif" }}>Support Desk</div>
+          </div>
+        </div>
+
+        <form
+          onSubmit={submit}
+          className="rounded-xl border p-5 space-y-4"
+          style={{ background: "#161D26", borderColor: "#242D3A" }}
+        >
+          <div className="flex items-center gap-2 mb-1" style={{ color: "#8B94A3" }}>
+            <Lock size={14} />
+            <span className="text-sm">Sign in to continue</span>
+          </div>
+
+          <Field label="Username">
+            <input
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              autoFocus
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+              style={{ background: "#1A222C", border: "1px solid #242D3A", color: "#E8EAED" }}
+            />
+          </Field>
+
+          <Field label="Password">
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+              style={{ background: "#1A222C", border: "1px solid #242D3A", color: "#E8EAED" }}
+            />
+          </Field>
+
+          {error && (
+            <p className="text-sm px-3 py-2 rounded-lg" style={{ background: "#3A1F1C", color: "#FF6B5E" }}>{error}</p>
+          )}
+
+          <button
+            type="submit"
+            disabled={!username || !password || loading}
+            className="w-full py-2.5 rounded-lg text-sm font-semibold flex items-center justify-center gap-2 disabled:opacity-50"
+            style={{ background: "#F5A623", color: "#12181F" }}
+          >
+            {loading && <Loader2 size={14} className="animate-spin" />} Log In
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
