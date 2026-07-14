@@ -246,11 +246,9 @@ function toLocalInputValue(iso) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
-// Builds a Google Maps search URL from company + site/location text.
-// Doesn't need a precise address — Maps handles fuzzy text search reasonably well.
-function mapsUrlFor(company, site) {
-  const query = [company, site].filter(Boolean).join(" ");
-  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}`;
+// Builds a Google Maps search URL from just the site/location text.
+function mapsUrlFor(site) {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(site || "")}`;
 }
 
 /* ---------------- Session persistence ----------------
@@ -917,7 +915,7 @@ function DetailDrawer({ request, techs, onClose, onSave, saving }) {
             </div>
             {(siteLocation || request["Company"]) && (
               <a
-                href={mapsUrlFor(request["Company"], siteLocation)}
+                href={mapsUrlFor(siteLocation)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1 text-xs mt-1.5 hover:underline"
@@ -1073,19 +1071,21 @@ function spanInfo(r, day) {
   return { totalDays: Math.max(totalDays, 1), dayIndex, isMultiDay: totalDays > 1 };
 }
 
-// A fixed palette of visually distinct colors, chosen to avoid clashing with
-// the existing semantic colors used elsewhere (amber=priority/brand,
-// red=urgent, teal=scheduled, blue=new status), so a tech's color is never
-// mistaken for a priority or status signal.
+// A fixed palette of visually distinct colors, generated with even hue
+// spacing (~20°+ between every pair) and kept well clear of the existing
+// semantic colors used elsewhere (amber=priority/brand, red=urgent,
+// teal=scheduled, green=resolved, blue=new status), so a tech's color is
+// never mistaken for a priority or status signal, and no two techs land
+// on colors that look alike.
 const TECH_COLOR_PALETTE = [
-  "#A78BFA", // violet
-  "#F472B6", // pink
-  "#22D3EE", // cyan
-  "#A3E635", // lime
-  "#818CF8", // indigo
-  "#FB7185", // rose
-  "#E879F9", // fuchsia
-  "#2DD4BF", // turquoise
+  "#D1E56C", // yellow-lime
+  "#A8E56C", // chartreuse
+  "#6C80E5", // periwinkle
+  "#826CE5", // indigo
+  "#AA6CE5", // violet
+  "#D56CE5", // purple-magenta
+  "#E56CCB", // orchid
+  "#E56CA2", // rose-pink
 ];
 function techColor(techName) {
   if (!techName) return "#3A4250"; // neutral gray for unassigned
